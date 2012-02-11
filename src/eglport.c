@@ -45,8 +45,8 @@
 int fbdev = -1;
 #endif
 
-bool VSync  = false;
-int8_t FSAA = 0;
+int8_t VSync    = 0;
+int8_t FSAA     = 0;
 
 EGLDisplay          g_eglDisplay    = NULL;
 EGLConfig           g_eglConfig     = NULL;
@@ -86,14 +86,14 @@ void EGL_Close()
     g_eglDisplay = NULL;
 
 #if defined(USE_EGL_RAW)
-	if (g_Window != NULL) {
-		free(g_Window);
-	}
+    if (g_Window != NULL) {
+        free(g_Window);
+    }
     g_Window = NULL;
 #elif defined(USE_EGL_SDL)
-	if (g_Display != NULL) {
-		XCloseDisplay(g_Display);
-	}
+    if (g_Display != NULL) {
+        XCloseDisplay(g_Display);
+    }
     g_Display = NULL;
 #else
     #error Incorrect EGL Configuration
@@ -101,7 +101,7 @@ void EGL_Close()
 
     CheckEGLErrors( __FILE__, __LINE__ );
 
-    printf( "EGL Closed\n");
+    printf( "EGL Closed\n" );
 
     Platform_Close();
 }
@@ -119,14 +119,14 @@ int8_t EGL_Init( void )
         return 1;
     }
 
-	printf( "EGL Config %d\n", configIndex );
+    printf( "EGL Config %d\n", configIndex );
 
-	if ( ConfigureEGL(g_allConfigs[configIndex]) != 0)
-	{
-		CheckEGLErrors( __FILE__, __LINE__ );
-		printf( "EGL ERROR: Unable to configure EGL. See previous error.\n" );
-		return 1;
-	}
+    if ( ConfigureEGL(g_allConfigs[configIndex]) != 0)
+    {
+        CheckEGLErrors( __FILE__, __LINE__ );
+        printf( "EGL ERROR: Unable to configure EGL. See previous error.\n" );
+        return 1;
+    }
 
     return 0;
 }
@@ -136,10 +136,10 @@ Swap EGL buffers and update the display
 ===========================================================*/
 void EGL_SwapBuffers( void )
 {
-    if (VSync == true) {
+    if (VSync != 0) {
         Platform_VSync();
     }
-	peglSwapBuffers( g_eglDisplay, g_eglSurface );
+    peglSwapBuffers( g_eglDisplay, g_eglSurface );
 }
 
 
@@ -149,7 +149,7 @@ void EGL_SwapBuffers( void )
 int8_t EGL_Open( void )
 {
     EGLBoolean result;
-    string output;
+    const char* output;
 
     // Setup any platform specific bits
     Platform_Open();
@@ -187,11 +187,11 @@ int8_t EGL_Open( void )
 
     // Get EGL Library Information
     output = peglQueryString( g_eglDisplay, EGL_VENDOR );
-    printf( "EGL_VENDOR: %s\n", output.c_str() );
+    printf( "EGL_VENDOR: %s\n", output );
     output = peglQueryString( g_eglDisplay, EGL_VERSION );
-    printf( "EGL_VERSION: %s\n", output.c_str() );
+    printf( "EGL_VERSION: %s\n", output );
     output = peglQueryString( g_eglDisplay, EGL_EXTENSIONS );
-    printf( "EGL_EXTENSIONS: %s\n", output.c_str() );
+    printf( "EGL_EXTENSIONS: %s\n", output );
 
     CheckEGLErrors( __FILE__, __LINE__ );
 
@@ -234,11 +234,11 @@ int8_t ConfigureEGL(EGLConfig config)
     printf( "EGL Binding API\n" );
     peglBindAPI( EGL_OPENGL_ES_API );
 
-	if ( CheckEGLErrors( __FILE__, __LINE__ ) !=  0 )
+    if ( CheckEGLErrors( __FILE__, __LINE__ ) !=  0 )
     {
         printf( "EGL ERROR: Could not bind EGL API.\n" );
-		return 1;
-	}
+        return 1;
+    }
 #endif /* defined(USE_EGL_SDL) */
 
     printf( "EGL Creating Context\n" );
@@ -349,10 +349,10 @@ int8_t FindAppropriateEGLConfigs( void )
     return 0;
 }
 
-int8_t CheckEGLErrors( const string& file, uint16_t line )
+int8_t CheckEGLErrors( const char* file, uint16_t line )
 {
     EGLenum error;
-    string errortext;
+    const char* errortext;
 
     error = eglGetError();
 
@@ -373,10 +373,10 @@ int8_t CheckEGLErrors( const string& file, uint16_t line )
             case EGL_BAD_PARAMETER:             errortext = "EGL_BAD_PARAMETER"; break;
             case EGL_BAD_NATIVE_PIXMAP:         errortext = "EGL_BAD_NATIVE_PIXMAP"; break;
             case EGL_BAD_NATIVE_WINDOW:         errortext = "EGL_BAD_NATIVE_WINDOW"; break;
-            default:                            errortext = "unknown"; break;
+            default:                            errortext = "Unknown EGL Error"; break;
         }
 
-        printf( "ERROR: EGL Error detected in file %s at line %d: %s (0x%X)\n", file.c_str(), line, errortext.c_str(), error );
+        printf( "ERROR: EGL Error detected in file %s at line %d: %s (0x%X)\n", file, line, errortext, error );
         return 1;
     }
 
